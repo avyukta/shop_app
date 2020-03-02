@@ -9,7 +9,7 @@ import 'package:shop_app/widgets/user_prductItem.dart';
 
 class UserProductScreen extends StatelessWidget {
   static const NamedRoute = '/user-product-screen';
-  Future<Void> _refreshProduct(BuildContext context) async {
+  Future<void> _refreshProduct(BuildContext context) async {
     await Provider.of<Products>(context).fetchAndSetProduct();
   }
 
