@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shop_app/providers/cart.dart';
+import 'package:shop_app/providers/products_provider.dart';
 import 'package:shop_app/screens/cart_screen.dart';
 import 'package:shop_app/widgets/badge.dart';
 import 'package:shop_app/widgets/drawer.dart';
@@ -16,6 +17,27 @@ class OverViewScreen extends StatefulWidget {
 
 class _OverViewScreenState extends State<OverViewScreen> {
   var _showFavouraiteFilter = false;
+
+  var _init = true;
+  var _isLoading = false;
+  @override
+  void didChangeDependencies() {
+    if (_init) {
+      setState(() {
+        _isLoading = true;
+      });
+      Provider.of<Products>(context, listen: false)
+          .fetchAndSetProduct()
+          .then((_) {
+        setState(() {
+          _isLoading = false;
+        });
+      });
+    }
+
+    _init = false;
+    super.didChangeDependencies();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,9 +86,17 @@ class _OverViewScreenState extends State<OverViewScreen> {
         ],
       ),
       drawer: AppDrawer(),
-      body: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: GridviewBuild(_showFavouraiteFilter),
+      body: RefreshIndicator(
+        onRefresh: () =>
+            Provider.of<Products>(context, listen: false).fetchAndSetProduct(),
+        child: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: _isLoading
+              ? Center(
+                  child: CircularProgressIndicator(),
+                )
+              : GridviewBuild(_showFavouraiteFilter),
+        ),
       ),
     );
   }
