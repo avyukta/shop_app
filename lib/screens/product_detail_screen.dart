@@ -31,7 +31,7 @@ class ProductDetail extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: <Widget>[
                 Text(
-                  'Price : \$ ${loadedProduct.price}',
+                  'Price : \$ ${loadedProduct.price.toStringAsFixed(2)}',
                   style: Theme.of(context).textTheme.title,
                 ),
                 SizedBox(

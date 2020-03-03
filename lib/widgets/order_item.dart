@@ -21,7 +21,7 @@ class _OrderItemState extends State<OrderItem> {
         children: <Widget>[
           ListTile(
             title: Text(
-              '\$  ${widget.orders.amount}',
+              '\$  ${widget.orders.amount.toStringAsFixed(2)}',
               style: Theme.of(context).textTheme.title,
             ),
             subtitle: Text(DateFormat('yyy MM dd hh:mm')
@@ -48,7 +48,7 @@ class _OrderItemState extends State<OrderItem> {
                               children: <Widget>[
                                 Text(orderProduct.title),
                                 Text(
-                                    '${orderProduct.quantity}x  \$ ${orderProduct.price}'),
+                                    '${orderProduct.quantity}x  \$ ${orderProduct.price.toStringAsFixed(2)}'),
                               ],
                             ),
                           ))

@@ -11,6 +11,7 @@ import '../widgets/gridview_builder.dart';
 enum FilterItems { Favouraite, All }
 
 class OverViewScreen extends StatefulWidget {
+  static const NamedRoute = 'over-view-screen';
   @override
   _OverViewScreenState createState() => _OverViewScreenState();
 }

@@ -70,7 +70,7 @@ class Products with ChangeNotifier {
     const url = 'https://jan-ae413.firebaseio.com/Products.json';
     try {
       final response = await http.get(url);
-      print(json.decode(response.body));
+
       final extractData = json.decode(response.body) as Map<String, dynamic>;
       List<Product> loadedProducts = [];
       extractData.forEach((prodId, prodData) {
@@ -117,9 +117,18 @@ class Products with ChangeNotifier {
     }
   }
 
-  void updateProduct(String id, Product newproduct) {
+  Future<void> updateProduct(String id, Product newproduct) async {
     final prodIndex = _items.indexWhere((prod) => prod.id == id);
+
     if (prodIndex >= 0) {
+      final url = 'https://jan-ae413.firebaseio.com/Products/$id.json';
+      await http.patch(url,
+          body: json.encode({
+            'title': newproduct.title,
+            'description': newproduct.description,
+            'imageurl': newproduct.imageUrl,
+            'price': newproduct.price
+          }));
       _items[prodIndex] = newproduct;
       notifyListeners();
     } else {
@@ -127,8 +136,18 @@ class Products with ChangeNotifier {
     }
   }
 
-  void removeProduct(String id) {
-    _items.removeWhere((prod) => prod.id == id);
+  Future<void> removeProduct(String id) async {
+    final url = 'https://jan-ae413.firebaseio.com/Products/$id.json';
+    final existingProductIndex = _items.indexWhere((prod) => prod.id == id);
+    var existingProduct = _items[existingProductIndex];
+    _items.removeAt(existingProductIndex);
     notifyListeners();
+    final response = await http.delete(url);
+    if (response.statusCode >= 400) {
+      _items.insert(existingProductIndex, existingProduct);
+      notifyListeners();
+      throw Exception('could not delete the product');
+    }
+    existingProduct = null;
   }
 }
