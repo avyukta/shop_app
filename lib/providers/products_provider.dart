@@ -5,6 +5,9 @@ import './product.dart';
 import 'package:http/http.dart' as http;
 
 class Products with ChangeNotifier {
+  final String authToken;
+  Products(this.authToken, this._items);
+
   List<Product> _items = [
     // Product(
     //   id: 'p1',
@@ -67,7 +70,8 @@ class Products with ChangeNotifier {
   }
 
   Future<void> fetchAndSetProduct() async {
-    const url = 'https://jan-ae413.firebaseio.com/Products.json';
+    final url =
+        'https://jan-ae413.firebaseio.com/Products.json?auth=$authToken';
     try {
       final response = await http.get(url);
 
@@ -90,7 +94,8 @@ class Products with ChangeNotifier {
   }
 
   Future<void> addProduct(Product product) async {
-    const url = 'https://jan-ae413.firebaseio.com/Products.json';
+    final url =
+        'https://jan-ae413.firebaseio.com/Products.json?auth=$authToken';
     try {
       final response = await http.post(
         url,
@@ -121,7 +126,8 @@ class Products with ChangeNotifier {
     final prodIndex = _items.indexWhere((prod) => prod.id == id);
 
     if (prodIndex >= 0) {
-      final url = 'https://jan-ae413.firebaseio.com/Products/$id.json';
+      final url =
+          'https://jan-ae413.firebaseio.com/Products/$id.json?auth=$authToken';
       await http.patch(url,
           body: json.encode({
             'title': newproduct.title,
@@ -137,7 +143,8 @@ class Products with ChangeNotifier {
   }
 
   Future<void> removeProduct(String id) async {
-    final url = 'https://jan-ae413.firebaseio.com/Products/$id.json';
+    final url =
+        'https://jan-ae413.firebaseio.com/Products/$id.json?auth=$authToken';
     final existingProductIndex = _items.indexWhere((prod) => prod.id == id);
     var existingProduct = _items[existingProductIndex];
     _items.removeAt(existingProductIndex);
