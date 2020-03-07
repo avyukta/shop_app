@@ -6,7 +6,8 @@ import 'package:http/http.dart' as http;
 
 class Products with ChangeNotifier {
   final String authToken;
-  Products(this.authToken, this._items);
+  final String userId;
+  Products(this.authToken, this.userId, this._items);
 
   List<Product> _items = [
     // Product(
@@ -70,12 +71,18 @@ class Products with ChangeNotifier {
   }
 
   Future<void> fetchAndSetProduct() async {
-    final url =
-        'https://jan-ae413.firebaseio.com/Products.json?auth=$authToken';
+    var url = 'https://jan-ae413.firebaseio.com/Products.json?auth=$authToken';
     try {
       final response = await http.get(url);
 
       final extractData = json.decode(response.body) as Map<String, dynamic>;
+      if (extractData == null) {
+        return;
+      }
+      url =
+          'https://jan-ae413.firebaseio.com/UserFavouraite/$userId.json?auth=$authToken';
+      final favResponse = await http.get(url);
+      final favData = json.decode(favResponse.body);
       List<Product> loadedProducts = [];
       extractData.forEach((prodId, prodData) {
         loadedProducts.add(Product(
@@ -84,7 +91,7 @@ class Products with ChangeNotifier {
             imageUrl: prodData['imageurl'],
             price: prodData['price'],
             title: prodData['title'],
-            isfavouraite: prodData['isFavouraite']));
+            isfavouraite: favData == null ? false : favData[prodId] ?? false));
       });
       _items = loadedProducts;
       notifyListeners();
@@ -104,7 +111,6 @@ class Products with ChangeNotifier {
           'description': product.description,
           'price': product.price,
           'imageurl': product.imageUrl,
-          'isFavouraite': product.isfavouraite
         }),
       );
       final newProduct = Product(

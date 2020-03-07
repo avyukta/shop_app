@@ -23,17 +23,18 @@ class Product with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> isFavouraitetoggle() async {
+  Future<void> isFavouraitetoggle(String token, String userId) async {
     final oldFavouraite = isfavouraite;
     isfavouraite = !isfavouraite;
     notifyListeners();
 
     try {
-      final url = 'https://jan-ae413.firebaseio.com/Products/$id.json';
-      final response = await http.patch(url,
-          body: json.encode({
-            'isFavouraite': isfavouraite,
-          }));
+      final url =
+          'https://jan-ae413.firebaseio.com/UserFavouraite/$userId/$id.json?auth=$token';
+      final response = await http.put(url,
+          body: json.encode(
+            isfavouraite,
+          ));
       if (response.statusCode >= 400) {
         _setFavValue(oldFavouraite);
       }
