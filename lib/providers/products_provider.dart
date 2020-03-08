@@ -70,8 +70,11 @@ class Products with ChangeNotifier {
     return _items.firstWhere((prod) => prod.id == id);
   }
 
-  Future<void> fetchAndSetProduct() async {
-    var url = 'https://jan-ae413.firebaseio.com/Products.json?auth=$authToken';
+  Future<void> fetchAndSetProduct([bool filterByUser = false]) async {
+    String filterString =
+        filterByUser ? 'orderBy="creatorId"&equalTo="$userId"' : '';
+    var url =
+        'https://jan-ae413.firebaseio.com/Products.json?auth=$authToken&$filterString';
     try {
       final response = await http.get(url);
 
@@ -83,30 +86,33 @@ class Products with ChangeNotifier {
           'https://jan-ae413.firebaseio.com/UserFavouraite/$userId.json?auth=$authToken';
       final favResponse = await http.get(url);
       final favData = json.decode(favResponse.body);
-      List<Product> loadedProducts = [];
+      final List<Product> loadedProducts = [];
       extractData.forEach((prodId, prodData) {
         loadedProducts.add(Product(
-            id: prodId,
-            description: prodData['description'],
-            imageUrl: prodData['imageurl'],
+            id: prodId.toString(),
+            description: prodData['description'].toString(),
+            imageUrl: prodData['imageurl'].toString(),
             price: prodData['price'],
-            title: prodData['title'],
-            isfavouraite: favData == null ? false : favData[prodId] ?? false));
+            title: prodData['title'].toString(),
+            isfavouraite: favData == null ? false : false));
       });
       _items = loadedProducts;
       notifyListeners();
     } catch (error) {
-      print(error);
+      throw (error);
+      // print(' error : $error');
     }
   }
 
   Future<void> addProduct(Product product) async {
     final url =
         'https://jan-ae413.firebaseio.com/Products.json?auth=$authToken';
+
     try {
       final response = await http.post(
         url,
         body: json.encode({
+          'creatorId': userId,
           'title': product.title,
           'description': product.description,
           'price': product.price,

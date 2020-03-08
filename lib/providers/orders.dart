@@ -30,57 +30,67 @@ class Orders with ChangeNotifier {
   }
 
   Future<void> fetchSetOrders() async {
-    final url = 'https://jan-ae413.firebaseio.com/Orders.json?auth=$authToken';
-    final response = await http.get(url);
-    print(json.decode(response.body));
-    final extractData = json.decode(response.body) as Map<String, dynamic>;
-    if (extractData.isEmpty) {
-      return;
+    try {
+      final url =
+          'https://jan-ae413.firebaseio.com/Orders.json?auth=$authToken';
+      final response = await http.get(url);
+      print(json.decode(response.body));
+      final extractData = json.decode(response.body) as Map<String, dynamic>;
+      if (extractData.isEmpty) {
+        return;
+      }
+      List<OrderItems> loadedProducts = [];
+      extractData.forEach((ordId, ordData) {
+        loadedProducts.add(OrderItems(
+          id: ordId,
+          amount: ordData['amount'],
+          dateTime: DateTime.parse(ordData['dateTime']),
+          products: (ordData['products'] as List<dynamic>)
+              .map((ci) => CartItems(
+                  id: ci['id'],
+                  price: ci['price'],
+                  quantity: ci['quantity'],
+                  title: ci['title']))
+              .toList(),
+        ));
+      });
+      _orders = loadedProducts;
+      notifyListeners();
+    } catch (error) {
+      print("eror from orders fetch : $error");
     }
-    List<OrderItems> loadedProducts = [];
-    extractData.forEach((ordId, ordData) {
-      loadedProducts.add(OrderItems(
-        id: ordId,
-        amount: ordData['amount'],
-        dateTime: DateTime.parse(ordData['dateTime']),
-        products: (ordData['products'] as List<dynamic>)
-            .map((ci) => CartItems(
-                id: ci['id'],
-                price: ci['price'],
-                quantity: ci['quantity'],
-                title: ci['title']))
-            .toList(),
-      ));
-    });
-    _orders = loadedProducts;
-    notifyListeners();
   }
 
   Future<void> addOrders(List<CartItems> cartProducts, double total) async {
-    var timeStamp = DateTime.now();
-    final url = 'https://jan-ae413.firebaseio.com/Orders.json?auth=$authToken';
-    final response = await http.post(url,
-        body: json.encode({
-          'amount': total,
-          'dateTime': timeStamp.toIso8601String(),
-          'products': cartProducts
-              .map((cp) => {
-                    'id': cp.id,
-                    'title': cp.title,
-                    'price': cp.price,
-                    'quantity': cp.quantity
-                  })
-              .toList()
-        }));
-    _orders.insert(
-        0,
-        OrderItems(
-          id: json.decode(response.body)['name'],
-          // title: title,
-          products: cartProducts,
-          amount: total,
-          dateTime: timeStamp,
-        ));
-    notifyListeners();
+    try {
+      var timeStamp = DateTime.now();
+      final url =
+          'https://jan-ae413.firebaseio.com/Orders.json?auth=$authToken';
+      final response = await http.post(url,
+          body: json.encode({
+            'amount': total,
+            'dateTime': timeStamp.toIso8601String(),
+            'products': cartProducts
+                .map((cp) => {
+                      'id': cp.id,
+                      'title': cp.title,
+                      'price': cp.price,
+                      'quantity': cp.quantity
+                    })
+                .toList()
+          }));
+      _orders.insert(
+          0,
+          OrderItems(
+            id: json.decode(response.body)['name'],
+            // title: title,
+            products: cartProducts,
+            amount: total,
+            dateTime: timeStamp,
+          ));
+      notifyListeners();
+    } catch (error) {
+      print("eror from orders add: $error");
+    }
   }
 }
