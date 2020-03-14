@@ -73,6 +73,7 @@ class Products with ChangeNotifier {
   Future<void> fetchAndSetProduct([bool filterByUser = false]) async {
     String filterString =
         filterByUser ? 'orderBy="creatorId"&equalTo="$userId"' : '';
+    print('userid: $userId');
     var url =
         'https://jan-ae413.firebaseio.com/Products.json?auth=$authToken&$filterString';
     try {
@@ -88,13 +89,15 @@ class Products with ChangeNotifier {
       final favData = json.decode(favResponse.body);
       final List<Product> loadedProducts = [];
       extractData.forEach((prodId, prodData) {
+        print(prodId);
+        print(prodData);
         loadedProducts.add(Product(
             id: prodId.toString(),
             description: prodData['description'].toString(),
             imageUrl: prodData['imageurl'].toString(),
             price: prodData['price'],
             title: prodData['title'].toString(),
-            isfavouraite: favData == null ? false : false));
+            isfavouraite: favData == null ? false : favData[prodId] ?? false));
       });
       _items = loadedProducts;
       notifyListeners();

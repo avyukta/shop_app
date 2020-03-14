@@ -65,4 +65,11 @@ class Auth with ChangeNotifier {
   ) async {
     return _authenticate(email, password, "signUp");
   }
+
+  void logOut() {
+    _token = null;
+    _userId = null;
+    _expirydate = null;
+    notifyListeners();
+  }
 }
