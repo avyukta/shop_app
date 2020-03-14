@@ -12,33 +12,41 @@ class OrderItem extends StatefulWidget {
   _OrderItemState createState() => _OrderItemState();
 }
 
-class _OrderItemState extends State<OrderItem> {
+class _OrderItemState extends State<OrderItem>
+    with SingleTickerProviderStateMixin {
   var _expanded = false;
-  @override
+
   Widget build(BuildContext context) {
-    return Card(
-      child: Column(
-        children: <Widget>[
-          ListTile(
-            title: Text(
-              '\$  ${widget.orders.amount.toStringAsFixed(2)}',
-              style: Theme.of(context).textTheme.title,
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 300),
+      height: _expanded
+          ? min(widget.orders.products.length * 40.0 + 100, 200)
+          : 100,
+      child: Card(
+        child: Column(
+          children: <Widget>[
+            ListTile(
+              title: Text(
+                '\$  ${widget.orders.amount.toStringAsFixed(2)}',
+                style: Theme.of(context).textTheme.title,
+              ),
+              subtitle: Text(DateFormat('yyy MM dd hh:mm')
+                  .format(widget.orders.dateTime)
+                  .toString()),
+              trailing: IconButton(
+                icon: Icon(_expanded ? Icons.expand_less : Icons.expand_more),
+                onPressed: () {
+                  setState(() {
+                    _expanded = !_expanded;
+                  });
+                },
+              ),
             ),
-            subtitle: Text(DateFormat('yyy MM dd hh:mm')
-                .format(widget.orders.dateTime)
-                .toString()),
-            trailing: IconButton(
-              icon: Icon(_expanded ? Icons.expand_less : Icons.expand_more),
-              onPressed: () {
-                setState(() {
-                  _expanded = !_expanded;
-                });
-              },
-            ),
-          ),
-          if (_expanded)
-            Container(
-              height: min(widget.orders.products.length * 60.0, 100),
+            AnimatedContainer(
+              duration: Duration(milliseconds: 300),
+              height: _expanded
+                  ? min(widget.orders.products.length * 60.0, 100)
+                  : 0,
               child: ListView(
                   children: widget.orders.products
                       .map((orderProduct) => Padding(
@@ -46,7 +54,10 @@ class _OrderItemState extends State<OrderItem> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
-                                Text(orderProduct.title),
+                                Text(
+                                  orderProduct.title,
+                                  style: Theme.of(context).textTheme.title,
+                                ),
                                 Text(
                                     '${orderProduct.quantity}x  \$ ${orderProduct.price.toStringAsFixed(2)}'),
                               ],
@@ -54,7 +65,8 @@ class _OrderItemState extends State<OrderItem> {
                           ))
                       .toList()),
             ),
-        ],
+          ],
+        ),
       ),
     );
   }
